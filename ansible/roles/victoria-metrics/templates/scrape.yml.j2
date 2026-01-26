@@ -1,0 +1,24 @@
+scrape_configs:
+  - job_name: nginx
+    scrape_interval: 5s
+    static_configs:
+      - targets:
+{% for host in groups['lbs'] %}
+        - {{ host }}:80
+{% endfor %}
+
+  - job_name: backends
+    scrape_interval: 5s
+    static_configs:
+      - targets:
+{% for host in groups['backends'] %}
+        - {{ host }}:8080
+{% endfor %}
+
+  - job_name: node
+    scrape_interval: 5s
+    static_configs:
+      - targets:
+{% for host in groups['all'] %}
+        - {{ host }}:9100
+{% endfor %}

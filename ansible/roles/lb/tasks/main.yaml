@@ -1,0 +1,82 @@
+- name: Install required packages for nginx and VTS
+  ansible.builtin.package:
+    name:
+      - nginx
+      - iproute2
+      - build-essential
+      - libpcre3-dev
+      - zlib1g-dev
+      - libssl-dev
+      - wget
+      - git
+      - ca-certificates
+    state: present
+    update_cache: yes
+
+- name: Remove default nginx config
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: Reload nginx
+
+- name: Download nginx source
+  ansible.builtin.get_url:
+    url: "http://nginx.org/download/nginx-1.22.1.tar.gz"
+    dest: "/tmp/nginx-1.22.1.tar.gz"
+    mode: '0644'
+
+- name: Extract nginx source
+  ansible.builtin.unarchive:
+    src: /tmp/nginx-1.22.1.tar.gz
+    dest: /tmp/
+    remote_src: yes
+
+- name: Clone nginx VTS module
+  ansible.builtin.git:
+    repo: "https://github.com/vozlt/nginx-module-vts.git"
+    dest: "/tmp/nginx-module-vts"
+
+- name: Compile nginx VTS dynamic module part 1
+  ansible.builtin.command: >
+    ./configure --with-compat --add-dynamic-module=/tmp/nginx-module-vts 
+  args:
+    chdir: /tmp/nginx-1.22.1
+
+- name: Compile nginx VTS dynamic module part 2
+  ansible.builtin.command: >
+    make modules
+  args:
+    chdir: /tmp/nginx-1.22.1
+
+- name: Ensure nginx modules directory exists
+  file:
+    path: /etc/nginx/modules
+    state: directory
+    mode: '0755'
+
+- name: Copy compiled VTS module to nginx modules directory
+  ansible.builtin.copy:
+    src: /tmp/nginx-1.22.1/objs/ngx_http_vhost_traffic_status_module.so
+    dest: /etc/nginx/modules/ngx_http_vhost_traffic_status_module.so
+    mode: '0644'
+    remote_src: yes
+
+- name: Copy nginx config for nginx
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    mode: '0644'
+  notify: Reload nginx
+
+- name: Copy nginx config for LB + VTS
+  ansible.builtin.template:
+    src: nginx-lb.conf.j2
+    dest: /etc/nginx/conf.d/lb.conf
+    mode: '0644'
+  notify: Reload nginx
+
+- name: Ensure nginx is enabled and running
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true

@@ -1,0 +1,24 @@
+FROM debian:bookworm-slim
+
+RUN apt update && \
+    apt install -y --no-install-recommends \
+    python3 \
+    python3-pip \
+    ansible \
+    openssh-client \
+    ca-certificates \
+    sudo \
+    iproute2 \
+    curl && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN useradd -m -s /bin/bash ansible-user && \
+    echo "ansible-user ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
+    mkdir -p /home/ansible-user/.ssh && \
+    chmod 700 /home/ansible-user/.ssh && \
+    chown -R ansible-user:ansible-user /home/ansible-user
+
+USER ansible-user
+WORKDIR /home/ansible-user/
+
+CMD ["tail", "-f", "/dev/null"]

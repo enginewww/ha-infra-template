@@ -1,0 +1,6 @@
+- name: Installing and configuring HA(High Availability)
+  hosts: lbs
+  become: true
+
+  roles:
+    - ha

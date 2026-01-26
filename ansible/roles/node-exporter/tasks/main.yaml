@@ -1,0 +1,34 @@
+---
+- name: Install dependencies
+  ansible.builtin.package:
+    name:
+      - wget
+      - ca-certificates
+    state: present
+    update_cache: yes
+
+- name: Create node_exporter directory
+  ansible.builtin.file:
+    path: "{{ node_exporter_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Download node_exporter
+  ansible.builtin.get_url:
+    url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+    dest: "{{ node_exporter_dir }}/node_exporter.tar.gz"
+
+- name: Extract node_exporter
+  ansible.builtin.unarchive:
+    src: "{{ node_exporter_dir }}/node_exporter.tar.gz"
+    dest: "{{ node_exporter_dir }}"
+    remote_src: yes
+    creates: "{{ node_exporter_dir }}/node_exporter-{{ node_exporter_version }}.linux-amd64/node_exporter"
+
+- name: Start node_exporter 
+  ansible.builtin.shell: |
+    {{ node_exporter_dir }}/node_exporter-{{ node_exporter_version }}.linux-amd64/node_exporter \
+    > {{ node_exporter_dir }}/node_exporter.log 2>&1 &
+  args:
+    executable: /bin/bash
+

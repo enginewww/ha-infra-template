@@ -1,0 +1,73 @@
+- name: Install dependencies
+  ansible.builtin.package:
+    name:
+      - wget
+      - ca-certificates
+      - adduser
+      - libfontconfig1
+    state: present
+    update_cache: yes
+
+- name: Create grafana directory
+  ansible.builtin.file:
+    path: "{{ grafana_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Download Grafana
+  ansible.builtin.get_url:
+    url: "https://dl.grafana.com/oss/release/grafana-{{ grafana_version }}.linux-amd64.tar.gz"
+    dest: "{{ grafana_dir }}/grafana.tar.gz"
+
+- name: Extract Grafana
+  ansible.builtin.unarchive:
+    src: "{{ grafana_dir }}/grafana.tar.gz"
+    dest: "{{ grafana_dir }}"
+    remote_src: yes
+    creates: "{{ grafana_dir }}/grafana-v{{ grafana_version }}"
+
+- name: Ensure datasources directory exists
+  ansible.builtin.file:
+    path: "{{ grafana_dir }}/grafana-v{{ grafana_version }}/conf/provisioning/datasources"
+    state: directory
+    mode: '0755'
+
+- name: Render VictoriaMetrics datasource
+  ansible.builtin.template:
+    src: datasource.yml.j2
+    dest: "{{ grafana_dir }}/grafana-v{{ grafana_version }}/conf/provisioning/datasources/victoria.yml"
+    mode: '0644'
+
+- name: Ensure dashboards directory exists
+  ansible.builtin.file:
+    path: "{{ grafana_dir }}/dashboards"
+    state: directory
+    mode: '0755'
+
+- name: Copy all dashboards
+  ansible.builtin.copy:
+    src: "dashboards/{{ item }}"
+    dest: "{{ grafana_dir }}/dashboards/{{ item }}"
+    mode: '0644'
+  loop: "{{ lookup('ansible.builtin.fileglob', 'files/dashboards/*.json', wantlist=True) | map('basename') | list }}"
+
+- name: Render dashboard provisioning
+  ansible.builtin.template:
+    src: dashboards.yml.j2
+    dest: "{{ grafana_dir }}/grafana-v{{ grafana_version }}/conf/provisioning/dashboards/dashboards.yml"
+    mode: '0644'
+
+- name: Kill Grafana 
+  ansible.builtin.shell: |
+    kill $(pgrep "grafana") || echo "Grafana not running"
+  args:
+    executable: /bin/bash
+
+- name: Start Grafana 
+  ansible.builtin.shell: |
+    {{ grafana_dir }}/grafana-v{{ grafana_version }}/bin/grafana server \
+      --homepath {{ grafana_dir }}/grafana-v{{ grafana_version }} \
+      --config {{ grafana_dir }}/grafana-v{{ grafana_version }}/conf/defaults.ini \
+      > {{ grafana_dir }}/grafana.log 2>&1 &
+  args:
+    executable: /bin/bash

@@ -1,0 +1,31 @@
+- name: Install apache2
+  ansible.builtin.package:
+    name: apache2
+    state: present
+    update_cache: yes
+
+- name: Configure apache ports
+  ansible.builtin.template:
+    src: ports.conf.j2
+    dest: /etc/apache2/ports.conf
+    mode: '0644'
+  notify: Restart apache2
+
+- name: Configure apache default site
+  ansible.builtin.template:
+    src: 000-default.conf.j2
+    dest: /etc/apache2/sites-available/000-default.conf
+    mode: '0644'
+  notify: Restart apache2
+
+- name: Copy index.html
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: /var/www/html/index.html
+    mode: '0644'
+
+- name: Ensure apache2 is enabled and running
+  ansible.builtin.service:
+    name: apache2
+    state: started
+    enabled: true

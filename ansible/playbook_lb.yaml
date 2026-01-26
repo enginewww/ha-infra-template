@@ -1,0 +1,6 @@
+- name: Installing and configuring load balancers
+  hosts: lbs
+  become: true
+
+  roles:
+    - lb

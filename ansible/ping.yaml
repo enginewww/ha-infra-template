@@ -1,0 +1,16 @@
+- name: Test playbook
+  hosts: cluster
+  gather_facts: yes
+  tasks:
+
+    - name: Install iproute2
+      ansible.builtin.package:
+        name: iproute2
+        state: present
+      become: true
+
+    - name: Show default IPv4 if exists
+      ansible.builtin.debug:
+        msg: "{{ ansible_facts.default_ipv4.address | default('No default IPv4 found') }}"
+
+

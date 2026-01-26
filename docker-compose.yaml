@@ -1,0 +1,79 @@
+x-ssh-key: &ssh-key
+- ./.ssh/id_ed25519.pub:/home/ansible-user/.ssh/authorized_keys:ro
+
+services:
+  ansible:
+    build:
+      context: .
+      dockerfile: Dockerfile.ansible
+    volumes:
+      - ./ansible:/home/ansible-user/ansible/
+      - ./.ssh:/home/ansible-user/.ssh/
+    networks:
+      bridge_net:
+
+  lb1:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    volumes:
+      *ssh-key
+    networks:
+      bridge_net:
+    ports: 
+      - 80:80
+    cap_add:
+    - NET_ADMIN
+
+  lb2:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    volumes:
+      *ssh-key
+    networks:
+      bridge_net:
+    cap_add: 
+    - NET_ADMIN
+
+  backend1:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    volumes:
+      *ssh-key
+    networks:
+      bridge_net:
+
+  backend2:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    volumes:
+      *ssh-key
+    networks:
+      bridge_net:
+
+  grafana:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    volumes:
+      *ssh-key
+    networks:
+      bridge_net:
+    ports: 
+    - 3000:3000
+
+  victoria-metrics:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    volumes:
+      *ssh-key
+    networks:
+      bridge_net:
+
+networks:
+  bridge_net:
+    driver: bridge

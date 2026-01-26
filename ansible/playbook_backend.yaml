@@ -1,0 +1,6 @@
+- name: Installing and configuring backend servers
+  hosts: backends
+  become: true
+
+  roles:
+    - backend

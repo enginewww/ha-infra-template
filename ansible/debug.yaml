@@ -1,0 +1,45 @@
+# Проверка балансировки
+# curl http://VipLb:80
+# (должен вернуться текст "Бэкенд 1" или "Бэкенд 2")
+- name: curl test
+  hosts: localhost
+  connection: local
+  become: true
+
+  tasks:
+    - name: Install curl
+      ansible.builtin.package:
+        name: curl
+        state: present
+        update_cache: yes
+
+    - name: Curl VIP from local container
+      ansible.builtin.shell: curl -s http://{{ VIP }}:80
+      register: curl_result
+      failed_when: false
+      changed_when: false
+
+    - name: Show curl result
+      ansible.builtin.debug:
+        var: curl_result.stdout
+# Определение активной ноды с VIP
+- name:
+  hosts: lbs
+  gather_facts: false
+
+  tasks:
+    - name: Check if VIP is assigned on this host
+      ansible.builtin.shell: ip addr | grep -w "{{ VIP }}"
+      register: VIP_check
+      failed_when: false
+      changed_when: false
+
+    - name: Print host with assigned VIP
+      when: VIP_check.rc == 0
+      ansible.builtin.debug:
+        msg: "VIP {{ VIP }} is on host {{ inventory_hostname }}"
+# на хосте останавливаем lb1/lb2:
+# docker stop ha-infra-template-lb1-1
+
+# запускаем еще раз этот playbook и смотрим, что VIP теперь на другом хосте
+# ansible-playbook debug.yaml

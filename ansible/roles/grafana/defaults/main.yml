@@ -1,0 +1,4 @@
+grafana_version: "10.3.1"
+grafana_dir: "/opt/grafana"
+grafana_port: 3000
+victoria_metrics_url: "http://victoria-metrics:8428"

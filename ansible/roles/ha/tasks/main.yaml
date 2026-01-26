@@ -1,0 +1,22 @@
+- name: Install keepalived and curl
+  ansible.builtin.package:
+    name: 
+      - keepalived
+      - curl
+    state: present
+    update_cache: yes
+
+- name: Copy keepalived.conf
+  ansible.builtin.template:
+    src: keepalived.j2
+    dest: /etc/keepalived/keepalived.conf
+
+- name: Stop keepalived service
+  ansible.builtin.service:
+    name: keepalived
+    state: stopped
+
+- name: Start keepalived
+  ansible.builtin.service:
+    name: keepalived
+    state: started

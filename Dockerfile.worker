@@ -1,0 +1,24 @@
+FROM debian:bookworm-slim
+# Only necessary packages for SSH and Ansible
+RUN apt update && \
+    apt install -y --no-install-recommends \
+    openssh-server \
+    python3 \
+    sudo && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN mkdir /var/run/sshd && \
+    sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config && \
+    sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin no/' /etc/ssh/sshd_config
+
+# TODO /usr/bin/apt, /usr/bin/nginx, etc instead ALL
+RUN useradd -m -s /bin/bash ansible-user && \
+    mkdir -p /home/ansible-user/.ssh && \
+    chmod 700 /home/ansible-user/.ssh && \
+    chown -R ansible-user:ansible-user /home/ansible-user && \
+    echo "ansible-user ALL=(root) NOPASSWD: ALL" >> /etc/sudoers.d/ansible-user 
+
+
+EXPOSE 22
+
+CMD ["/usr/sbin/sshd", "-D"]

@@ -1,0 +1,34 @@
+
+# Создаём зону VTS
+vhost_traffic_status_zone;
+
+
+# Определяем upstream для бекендов
+upstream backends {
+    {% for backend in groups['backends'] %}
+    server {{ backend }}:8080;
+    {% endfor %}
+}
+
+server {
+    listen 80;
+
+    # Проксирование к бэкендам
+    location / {
+        proxy_pass http://backends;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # VTS метрики в Prometheus формате
+    location /metrics {
+        vhost_traffic_status_display;
+        vhost_traffic_status_display_format prometheus;
+    }
+
+    # Дополнительно можно /status для human-readable
+    location /status {
+        vhost_traffic_status_display;
+        vhost_traffic_status_display_format html;
+    }
+}
