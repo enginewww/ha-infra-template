@@ -6,6 +6,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.ansible
+    container_name: ansible
     volumes:
       - ./ansible:/home/ansible-user/ansible/
       - ./.ssh:/home/ansible-user/.ssh/
@@ -16,6 +17,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.worker
+    container_name: lb1
     volumes:
       *ssh-key
     networks:
@@ -29,6 +31,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.worker
+    container_name: lb2
     volumes:
       *ssh-key
     networks:
@@ -40,6 +43,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.worker
+    container_name: backend1
     volumes:
       *ssh-key
     networks:
@@ -49,6 +53,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.worker
+    container_name: backend2
     volumes:
       *ssh-key
     networks:
@@ -58,21 +63,25 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.worker
+    container_name: grafana
     volumes:
       *ssh-key
     networks:
       bridge_net:
     ports: 
-    - 3000:3000
+      - 3000:3000
 
   victoria-metrics:
     build:
       context: .
       dockerfile: Dockerfile.worker
+    container_name: victoria-metrics
     volumes:
       *ssh-key
     networks:
       bridge_net:
+    ports:
+      - 8428:8428
 
 networks:
   bridge_net:

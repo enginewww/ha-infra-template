@@ -11,7 +11,7 @@ vrrp_instance VI_1 {
   priority {{ 101 if inventory_hostname == groups['lbs'][0] else 100 }}
 
   virtual_ipaddress {
-    {{ VIP }}/24
+    {{ VIP }}/{{ ansible_facts.default_ipv4.prefix }}
   }
 
   track_script {

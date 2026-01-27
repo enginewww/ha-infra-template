@@ -6,6 +6,14 @@
     state: present
     update_cache: yes
 
+- name: Calculate VIP for local network
+  set_fact:
+    VIP: "{{ ansible_default_ipv4.address.split('.')[:2] | join('.') }}.{{ vip_last_octets }}"
+
+# - name: Show VIP
+#   ansible.builtin.debug:
+#     msg: "{{ vip_last_octets }}, {{ VIP }}, {{ ansible_default_ipv4.address.split('.')[:2] | join('.') }}"
+
 - name: Copy keepalived.conf
   ansible.builtin.template:
     src: keepalived.j2
@@ -20,3 +28,14 @@
   ansible.builtin.service:
     name: keepalived
     state: started
+
+- name: Check if VIP is assigned on this host
+  ansible.builtin.shell: ip addr | grep -w "{{ VIP }}"
+  register: VIP_check
+  failed_when: false
+  changed_when: false
+
+- name: Print host with assigned VIP
+  when: VIP_check.rc == 0
+  ansible.builtin.debug:
+    msg: "VIP {{ VIP }} is on host {{ inventory_hostname }}"

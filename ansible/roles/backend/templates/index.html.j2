@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html>
-
-<body>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <title>Бэкэнд {{ inventory_hostname | regex_search('[0-9]+$') }}</title>
+  </head>
+  <body>
     <h1>Бэкэнд {{ inventory_hostname | regex_search('[0-9]+$') }}</h1>
-</body>
-
+  </body>
 </html>

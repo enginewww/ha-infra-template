@@ -7,14 +7,6 @@ scrape_configs:
         - {{ host }}:80
 {% endfor %}
 
-  - job_name: backends
-    scrape_interval: 5s
-    static_configs:
-      - targets:
-{% for host in groups['backends'] %}
-        - {{ host }}:8080
-{% endfor %}
-
   - job_name: node
     scrape_interval: 5s
     static_configs:

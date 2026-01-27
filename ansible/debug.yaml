@@ -7,6 +7,10 @@
   become: true
 
   tasks:
+    - name: Calculate VIP for local network
+      set_fact:
+        VIP: "{{ ansible_default_ipv4.address.split('.')[:2] | join('.') }}.{{ vip_last_octets }}"
+
     - name: Install curl
       ansible.builtin.package:
         name: curl
@@ -22,12 +26,21 @@
     - name: Show curl result
       ansible.builtin.debug:
         var: curl_result.stdout
+
 # Определение активной ноды с VIP
 - name:
   hosts: lbs
-  gather_facts: false
+  gather_facts: yes
 
   tasks:
+    - name: debug
+      debug:
+        msg: "{{ ansible_facts.default_ipv4.address | default('No default IPv4 found') }}"
+
+    - name: Calculate VIP for local network
+      set_fact:
+        VIP: "{{ ansible_default_ipv4.address.split('.')[:2] | join('.') }}.{{ vip_last_octets }}"
+
     - name: Check if VIP is assigned on this host
       ansible.builtin.shell: ip addr | grep -w "{{ VIP }}"
       register: VIP_check
@@ -38,8 +51,9 @@
       when: VIP_check.rc == 0
       ansible.builtin.debug:
         msg: "VIP {{ VIP }} is on host {{ inventory_hostname }}"
+        
 # на хосте останавливаем lb1/lb2:
-# docker stop ha-infra-template-lb1-1
+# docker stop lb1
 
 # запускаем еще раз этот playbook и смотрим, что VIP теперь на другом хосте
 # ansible-playbook debug.yaml
