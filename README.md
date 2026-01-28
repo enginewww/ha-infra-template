@@ -15,7 +15,7 @@
 
 1.  **Клонируйте репозиторий:**
     ```bash
-    git clone https://github.com/railgorail/ha-infra-template.git
+    git clone https://github.com/enginewww/ha-infra-template.git
     cd ha-infra-template
     ```
 
