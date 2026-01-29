@@ -1,0 +1,3 @@
+keepalived_exporter_version: "0.7.1"
+keepalived_exporter_dir: "/opt/keepalived"
+keepalived_exporter_port: 9165

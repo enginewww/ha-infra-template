@@ -1,0 +1,36 @@
+- name: Install dependencies
+  ansible.builtin.package:
+    name:
+      - wget
+      - ca-certificates
+    state: present
+    update_cache: yes
+
+- name: Create keepalived_exporter directory
+  ansible.builtin.file:
+    path: "{{ keepalived_exporter_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Download keepalived_exporter
+  ansible.builtin.get_url:
+    url: "https://github.com/gen2brain/keepalived_exporter/releases/download/v{{ keepalived_exporter_version }}/keepalived_exporter-{{ keepalived_exporter_version }}-amd64.tar.gz"
+    dest: "{{ keepalived_exporter_dir }}/keepalived_exporter.tar.gz"
+
+- name: Extract keepalived_exporter
+  ansible.builtin.unarchive:
+    src: "{{ keepalived_exporter_dir }}/keepalived_exporter.tar.gz"
+    dest: "{{ keepalived_exporter_dir }}"
+    remote_src: yes
+    creates: "{{ keepalived_exporter_dir }}/keepalived_exporter"
+
+- name: Start keepalived_exporter
+  ansible.builtin.shell: |
+    {{ keepalived_exporter_dir }}/keepalived_exporter-{{ keepalived_exporter_version }}-amd64/keepalived_exporter \
+    --web.listen-address=":{{ keepalived_exporter_port }}" \
+    > {{ keepalived_exporter_dir }}/keepalived_exporter.log 2>&1 &
+  args:
+    executable: /bin/bash
+
+- name: Test keepalived_exporter
+  include_tasks: test.yaml

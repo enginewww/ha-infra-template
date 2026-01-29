@@ -10,13 +10,13 @@
   ansible.builtin.file:
     path: "{{ vm_dir }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
 
 - name: Download VictoriaMetrics tarball
   ansible.builtin.get_url:
     url: "https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/v{{ vm_version }}/victoria-metrics-linux-amd64-v{{ vm_version }}.tar.gz"
     dest: "{{ vm_dir }}/victoria-metrics.tar.gz"
-    mode: '0644'
+    mode: "0644"
 
 - name: Extract VictoriaMetrics
   ansible.builtin.unarchive:
@@ -29,15 +29,15 @@
   ansible.builtin.file:
     path: "{{ vm_dir }}/data"
     state: directory
-    mode: '0755'
+    mode: "0755"
 
 - name: Render scrape config
   ansible.builtin.template:
-    src: scrape.yml.j2
+    src: scrape.yaml.j2
     dest: "{{ vm_scrape_config }}"
-    mode: '0644'
+    mode: "0644"
 
-- name: Start VictoriaMetrics 
+- name: Start VictoriaMetrics
   ansible.builtin.shell: |
     {{ vm_dir }}/victoria-metrics-prod \
       -storageDataPath={{ vm_dir }}/data \

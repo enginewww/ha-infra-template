@@ -12,7 +12,7 @@
   ansible.builtin.file:
     path: "{{ grafana_dir }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
 
 - name: Download Grafana
   ansible.builtin.get_url:
@@ -30,40 +30,40 @@
   ansible.builtin.file:
     path: "{{ grafana_dir }}/grafana-v{{ grafana_version }}/conf/provisioning/datasources"
     state: directory
-    mode: '0755'
+    mode: "0755"
 
 - name: Render VictoriaMetrics datasource
   ansible.builtin.template:
-    src: datasource.yml.j2
-    dest: "{{ grafana_dir }}/grafana-v{{ grafana_version }}/conf/provisioning/datasources/victoria.yml"
-    mode: '0644'
+    src: datasource.yaml.j2
+    dest: "{{ grafana_dir }}/grafana-v{{ grafana_version }}/conf/provisioning/datasources/victoria.yaml"
+    mode: "0644"
 
 - name: Ensure dashboards directory exists
   ansible.builtin.file:
     path: "{{ grafana_dir }}/dashboards"
     state: directory
-    mode: '0755'
+    mode: "0755"
 
 - name: Copy all dashboards
   ansible.builtin.copy:
     src: "dashboards/{{ item }}"
     dest: "{{ grafana_dir }}/dashboards/{{ item }}"
-    mode: '0644'
+    mode: "0644"
   loop: "{{ lookup('ansible.builtin.fileglob', 'files/dashboards/*.json', wantlist=True) | map('basename') | list }}"
 
 - name: Render dashboard provisioning
   ansible.builtin.template:
-    src: dashboards.yml.j2
-    dest: "{{ grafana_dir }}/grafana-v{{ grafana_version }}/conf/provisioning/dashboards/dashboards.yml"
-    mode: '0644'
+    src: dashboards.yaml.j2
+    dest: "{{ grafana_dir }}/grafana-v{{ grafana_version }}/conf/provisioning/dashboards/dashboards.yaml"
+    mode: "0644"
 
-- name: Kill Grafana 
+- name: Kill Grafana
   ansible.builtin.shell: |
     kill $(pgrep "grafana") || echo "Grafana not running"
   args:
     executable: /bin/bash
 
-- name: Start Grafana 
+- name: Start Grafana
   ansible.builtin.shell: |
     {{ grafana_dir }}/grafana-v{{ grafana_version }}/bin/grafana server \
       --homepath {{ grafana_dir }}/grafana-v{{ grafana_version }} \

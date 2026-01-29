@@ -1,0 +1,19 @@
+- name:
+  hosts: lbs
+  gather_facts: yes
+
+  tasks:
+    - name: Calculate VIP
+      set_fact:
+        VIP: "{{ ansible_default_ipv4.address.split('.')[:2] | join('.') }}.{{ vip_last_octets }}"
+
+    - name: Check if VIP is assigned on this host
+      ansible.builtin.shell: ip addr | grep -w "{{ VIP }}"
+      register: VIP_check
+      failed_when: false
+      changed_when: false
+
+    - name: Print host with assigned VIP
+      when: VIP_check.rc == 0
+      ansible.builtin.debug:
+        msg: "название ноды c VIP: {{ inventory_hostname }}"

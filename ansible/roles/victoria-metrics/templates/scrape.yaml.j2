@@ -1,4 +1,5 @@
 scrape_configs:
+
   - job_name: nginx
     scrape_interval: 5s
     static_configs:
@@ -13,4 +14,11 @@ scrape_configs:
       - targets:
 {% for host in groups['all'] %}
         - {{ host }}:9100
+{% endfor %}
+
+  - job_name: keepalived
+    static_configs:
+      - targets:
+{% for host in groups['lbs'] %}
+        - {{ host }}:9165
 {% endfor %}
