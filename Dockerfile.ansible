@@ -13,10 +13,10 @@ RUN apt update && \
     rm -rf /var/lib/apt/lists/*
 
 RUN useradd -m -s /bin/bash ansible-user && \
-    echo "ansible-user ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
     mkdir -p /home/ansible-user/.ssh && \
     chmod 700 /home/ansible-user/.ssh && \
-    sudo chown -R ansible-user:ansible-user /home/ansible-user
+    chown -R ansible-user:ansible-user /home/ansible-user && \
+    echo "ansible-user ALL=(root) NOPASSWD: ALL" >> /etc/sudoers.d/ansible-user 
 
 USER ansible-user
 WORKDIR /home/ansible-user/
