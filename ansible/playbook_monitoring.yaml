@@ -10,14 +10,14 @@
   roles:
     - keepalived-exporter
 
-# - name: Install VictoriaMetrics server
-#   hosts: victoria-metrics
-#   become: true
-#   roles:
-#     - victoria-metrics
+- name: Install VictoriaMetrics server
+  hosts: victoria-metrics
+  become: true
+  roles:
+    - victoria-metrics
 
-# - name: Install Grafana
-#   hosts: grafana
-#   become: true
-#   roles:
-#     - grafana
+- name: Install Grafana
+  hosts: grafana
+  become: true
+  roles:
+    - grafana
