@@ -16,7 +16,7 @@ RUN useradd -m -s /bin/bash ansible-user && \
     echo "ansible-user ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
     mkdir -p /home/ansible-user/.ssh && \
     chmod 700 /home/ansible-user/.ssh && \
-    chown -R ansible-user:ansible-user /home/ansible-user
+    sudo chown -R ansible-user:ansible-user /home/ansible-user
 
 USER ansible-user
 WORKDIR /home/ansible-user/
